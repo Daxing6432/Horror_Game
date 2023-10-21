@@ -7,7 +7,8 @@
 #include "Camera/CameraShakeBase.h"
 #include "DrawDebugHelpers.h"
 #include "Misc/OutputDeviceNull.h"
-
+#include "RotObject.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AFirstPersonCharacter::AFirstPersonCharacter()
@@ -72,9 +73,6 @@ void AFirstPersonCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 	PlayerInputComponent->BindAction("Interaction", IE_Pressed, this, &AFirstPersonCharacter::OnInteraction);
 	PlayerInputComponent->BindAction("Interaction", IE_Pressed, this, &AFirstPersonCharacter::OnItemInteraction);
-	
-	PlayerInputComponent->BindAction("Move", IE_Pressed, this, &AFirstPersonCharacter::StartedMoving);
-	PlayerInputComponent->BindAction("Move", IE_Released, this, &AFirstPersonCharacter::StoppedMoving);
 }
 //-----------------------------------------------------------------
 
@@ -90,16 +88,7 @@ void AFirstPersonCharacter::MoveRight(float Value)
 	AddMovementInput(GetActorRightVector() * Value);
 }
 
-void AFirstPersonCharacter::StartedMoving()
-{
-	CameraShakeControll(StandingCameraShakeClass, WalkCameraShakeClass);
-}
-
-void AFirstPersonCharacter::StoppedMoving()
-{	
-	CameraShakeControll(WalkCameraShakeClass, StandingCameraShakeClass);
-}
-//-----------------------------------------------------------------
+//----------------------------------------------------------------
 
 
 //					Interaction voids
@@ -123,7 +112,7 @@ void AFirstPersonCharacter::OnItemInteraction()
 	AController* PlayerController = GetController();
 	if(PlayerController == nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("ERROR, Player controller not found check FPC.cpp"))
+		UE_LOG(LogTemp, Error, TEXT("Player controller not found"))
 		return;	
 	}
 
@@ -143,7 +132,22 @@ void AFirstPersonCharacter::OnItemInteraction()
 	if (bSuccess)
 	{
 		AActor* ActorHit = HitResult.GetActor();
-			
+
+		if(ActorHit->GetClass()->IsChildOf(ARotObject::StaticClass()))
+		{
+			RotObject = Cast<ARotObject>(ActorHit);
+			RotObject->TakeObject();
+			RotObject->bIsActive = true;
+			FOutputDeviceNull ar;
+
+			// I wanna die :p
+			const FString command = FString::Printf(TEXT("SetDPIAndMSTo0 0 0"));
+			CallFunctionByNameWithArguments(*command, ar, NULL, true);
+		}
+		/*
+		
+		Kto to kur*a pisał
+		
 		FOutputDeviceNull ar2;
 		const FString TurnOffcommand = FString::Printf(TEXT("RemoveText"));
 		CallFunctionByNameWithArguments(*TurnOffcommand, ar2, NULL, true);
@@ -178,6 +182,7 @@ void AFirstPersonCharacter::OnItemInteraction()
 			const FString command = FString::Printf(TEXT("DisplayText One of my best creations"));
 			CallFunctionByNameWithArguments(*command, ar, NULL, true);
 		}
+		*/
 	}	
 }
 //-----------------------------------------------------------------

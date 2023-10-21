@@ -50,20 +50,17 @@ public:
 
 	class ADoor* CurrentDoor;
 	class ALamp* CurrentLamp;
+	class ARotObject* RotObject;
 	
 	UFUNCTION()
 	void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	UPROPERTY(EditAnywhere, Category = "CameraShake")
-	TSubclassOf<class UCameraShakeBase> WalkCameraShakeClass;
-	
+
 	UPROPERTY(EditAnywhere, Category = "CameraShake")
 	TSubclassOf<class UCameraShakeBase> StandingCameraShakeClass;
 
 	void CameraShakeControll(TSubclassOf<class UCameraShakeBase> StoppedCameraShake, TSubclassOf<class UCameraShakeBase> StartedCameraShake);
 
-	void StartedMoving();
-	void StoppedMoving();
 	// declare overlap end function
 	UFUNCTION()
 	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
