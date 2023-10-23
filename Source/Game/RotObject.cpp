@@ -2,7 +2,8 @@
 
 
 #include "RotObject.h"
-
+#include "FirstPersonCharacter.h"
+#include "Kismet/GameplayStatics.h"
 // Sets default values
 ARotObject::ARotObject()
 {
@@ -15,16 +16,22 @@ void ARotObject::BeginPlay()
 {
 	Super::BeginPlay();
 	CurrentLocaction = GetActorLocation();
+
+	StartLocation = GetActorLocation();
+	StartRotation = GetActorRotation();
+
 	EnableInput(GetWorld()->GetFirstPlayerController());
 
 	if(InputComponent)
 	{
-		FInputAxisBinding& LookBinding = InputComponent->BindAxis("Move Forward", this ,&ARotObject::RotateObjectZ);
+		FInputAxisBinding& RotateBinding = InputComponent->BindAxis("Move Right", this ,&ARotObject::RotateObjectZ);
+		FInputActionBinding& PutDownObjectBinding = InputComponent->BindAction("PutObjectDown", IE_Released ,this, &ARotObject::CastToFPC);
+   		
+		RotateBinding.bConsumeInput = false;
+		RotateBinding.bExecuteWhenPaused = true;
 
-   		LookBinding.bConsumeInput = false;
-		LookBinding.bExecuteWhenPaused = true;
-
-
+		PutDownObjectBinding.bConsumeInput = false;
+		PutDownObjectBinding.bExecuteWhenPaused = true;
 	}
   
 }
@@ -36,17 +43,21 @@ void ARotObject::Tick(float DeltaTime)
 	if(bIsActive)
 	{
 		CurrentLocaction = FMath::Lerp(CurrentLocaction, TargetLocation, 0.1f);
+		SetActorLocation(CurrentLocaction);	
+	}
+	else
+	{
+		CurrentLocaction = FMath::Lerp(CurrentLocaction, StartLocation, 0.1f);
+		SetActorRotation(StartRotation);
 		SetActorLocation(CurrentLocaction);
 	}
-
-
 }
 
 void ARotObject::TakeObject()
 {
 	// Get Player camera rotation and location 
-	
 
+	bIsActive = true;
 	AController* PlayerController = GetWorld()->GetFirstPlayerController();
 	if(PlayerController == nullptr)
 	{
@@ -56,24 +67,41 @@ void ARotObject::TakeObject()
 
 	FVector Location;
 	FRotator Rotation;
-
+	
 	PlayerController->GetPlayerViewPoint(Location, Rotation);
 
-	TargetLocation = Location + Rotation.Vector() * 80;
+	TargetLocation = Location + Rotation.Vector() * 70;
 	TargetLocation.Z -= 10;
+
 	SetActorRotation(Rotation);
+
+	NewRotation = Rotation;
 }
 
 void ARotObject::RotateObjectZ(float AxisValue)
 {	
 	if(bIsActive)
 	{
-		float NewYawRotation = GetActorRotation().Yaw + AxisValue * -1.5;
-		FRotator NewRotation; 
+		float NewYawRotation = NewRotation.Yaw + AxisValue * -1.5;
 
-		NewRotation.Roll = GetActorRotation().Roll;
-		NewRotation.Pitch = GetActorRotation().Pitch;
+		NewRotation.Roll = NewRotation.Roll;
+		NewRotation.Pitch = NewRotation.Pitch;
 		NewRotation.Yaw = NewYawRotation;
 		SetActorRotation(NewRotation);
+	}
+}
+
+void ARotObject::PutDownObject()
+{	
+
+}
+
+void ARotObject::CastToFPC()
+{
+
+	if(bIsActive && FirstPersonCharacterPTR != nullptr)
+	{
+		FirstPersonCharacterPTR->PutItemDown();
+		bIsActive = false;
 	}
 }

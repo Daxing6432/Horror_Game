@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "RotObject.generated.h"
-
 UCLASS()
 class GAME_API ARotObject : public AActor
 {
@@ -22,6 +21,8 @@ public:
 	void RotateObjectZ(float AxisValue);
 
 	void TakeObject();
+	void PutDownObject();
+	void CastToFPC();
 
 protected:
 	// Called when the game starts or when spawned
@@ -29,9 +30,16 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	class AFirstPersonCharacter* FirstPersonCharacterPTR;
 private:
 	
 	
+	
+	FRotator NewRotation;
+	FRotator StartRotation;
+
+	FVector StartLocation;
 	FVector CurrentLocaction;
 	FVector TargetLocation;
 };

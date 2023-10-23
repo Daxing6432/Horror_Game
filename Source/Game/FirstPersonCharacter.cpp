@@ -132,21 +132,19 @@ void AFirstPersonCharacter::OnItemInteraction()
 	if (bSuccess)
 	{
 		AActor* ActorHit = HitResult.GetActor();
-
+	
 		if(ActorHit->GetClass()->IsChildOf(ARotObject::StaticClass()))
 		{
 			RotObject = Cast<ARotObject>(ActorHit);
+			RotObject->FirstPersonCharacterPTR = this;
 			RotObject->TakeObject();
-			RotObject->bIsActive = true;
 			FOutputDeviceNull ar;
-
 			// I wanna die :p
-			const FString command = FString::Printf(TEXT("SetDPIAndMSTo0 0 0"));
+			const FString command = FString::Printf(TEXT("SetDPIAndMS 0 0"));
 			CallFunctionByNameWithArguments(*command, ar, NULL, true);
 		}
+		// HUHn't
 		/*
-		
-		Kto to kur*a pisał
 		
 		FOutputDeviceNull ar2;
 		const FString TurnOffcommand = FString::Printf(TEXT("RemoveText"));
@@ -185,6 +183,12 @@ void AFirstPersonCharacter::OnItemInteraction()
 		*/
 	}	
 }
+
+void AFirstPersonCharacter::PutItemDown()
+{
+	FOutputDeviceNull ar;
+	const FString command = FString::Printf(TEXT("SetDPIAndMS 1 150"));
+	CallFunctionByNameWithArguments(*command, ar, NULL, true);	}
 //-----------------------------------------------------------------
 
 
